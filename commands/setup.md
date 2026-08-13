@@ -66,7 +66,17 @@ complete: identity line, work-authorization block (pick the right one), fixed
 answers (including their explicit choices on demographic questions and salary),
 free-text answer facts, and any special instructions. Tell the user this file
 is also where they add special instructions later - things like "never apply
-to competitors of X", writing-style rules, or dropdown quirks for their degree.
+to competitors of X" or dropdown quirks for their degree.
+
+Point out the **writing rules** block in the free-text section explicitly:
+the template ships defaults that keep everything written in their voice
+(application answers, resume bullets) reading like a person, not a model -
+no em-dashes, no strawman contrast, no explainer clauses, the delete test.
+Recommend keeping them as-is, and tell the user they are plain text in
+profile.md: edit, extend, or delete them like anything else in the file. If
+they change the em-dash or contrast rules, mention that `_BANNED` in
+`resume/render.py` mechanically enforces those two on resume text and should
+be edited to match.
 
 ## Stage 4: resume data
 

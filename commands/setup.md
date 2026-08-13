@@ -7,6 +7,66 @@ interactively, one stage at a time. Ask before each stage, show what you
 wrote, and let them correct it. Never invent facts about the user; everything
 personal comes from their answers.
 
+Tone for the whole setup: direct and concrete. Get to the point. No
+marketing language, no hedging, no "great question!". When a stage has a
+tradeoff (plaintext password, inbox access, ToS risk), state it in one plain
+sentence and move on. The user is trusting this thing to submit job
+applications with their name on it; they need to understand it, fast.
+
+## Stage -1: tell the user what they are getting
+
+Before checking anything, give this briefing in your own words, compressed.
+Do not skip it and do not pad it:
+
+**What it does.** Finds jobs by polling ~2,000 company ATS boards
+(Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters, Workday)
+plus Indeed/LinkedIn sweeps every 3 hours. Hard-filters by title/location/
+age/sponsorship, scores each survivor 0-100 with Claude against their
+criteria. Score >= 70 goes to a queue. Five times a day, a Claude agent
+takes the queue and applies for real: tailors a one-page resume per job,
+fills the form in a real browser, screenshots it, submits, and logs it. A
+daily digest reports everything.
+
+**What it costs.** Runs on their Claude subscription via the CLI (scoring on
+Haiku, applying on Sonnet). No API key, ever. Heavy applying eats plan
+quota; the pipeline backs off automatically when the plan window is
+exhausted.
+
+**What it will NOT do.** Solve captchas, pass login walls it cannot pass,
+LinkedIn Easy Apply, or invent resume facts. Those jobs park in a
+needs_human queue for the user.
+
+**How they use it day to day.** Read the morning digest, clear the
+needs_human queue, spot-check review records. `/jobpilot:status` or
+`python -m jobpilot status` any time. `promote`/`skip` to override the
+queue.
+
+**Where things live** (show this table):
+
+| Path | What is in it |
+|---|---|
+| `config.yaml` | what to search for; scoring rules |
+| `profile.md` | who is applying; every fixed form answer; special instructions |
+| `resume/resume.json` | resume data (bullets with ids) |
+| `resume/out/` | every rendered resume PDF, including the tailored one per job |
+| `resume/tailor/` | the per-job tailor overlays (what changed and why) |
+| `out/applications/` | review record per application: every field + answer + pre-submit screenshot |
+| `out/digest-YYYY-MM-DD.md` | the daily digest |
+| `jobs.db` | SQLite: every job seen, scored, applied |
+| `applications.csv` | flat log of everything submitted; the duplicate guard |
+| `logs/`, `~/Library/Logs/jobpilot-*.log` | run logs |
+| `secrets/workday.json` | Workday email + standard password (created in stage 6) |
+
+**The honest caveats, up front:** every answer on every form comes from
+profile.md, which they write; the resume tailor cannot invent experience;
+automated submission may violate some sites' terms of service, and the
+defaults (40/day cap, minutes between submissions, no Easy Apply) are
+deliberately conservative; review records exist so they can audit every
+application after the fact, and they should actually read them, especially
+the first week.
+
+Then ask if they want to proceed.
+
 ## Stage 0: prerequisites check
 
 Check and report each of these, with the fix if missing:

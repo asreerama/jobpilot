@@ -1,0 +1,142 @@
+# JobPilot configuration. Copy to config.yaml and edit every section marked
+# CHANGE ME. Everything tunable lives here; nothing personal is hardcoded in
+# the code.
+
+profile:
+  name: Jordan Example                    # CHANGE ME
+  email: jordan@example.com               # CHANGE ME
+  location: San Francisco, CA             # CHANGE ME
+  resume_json: resume/resume.json
+  # One-line positioning used by the LLM scorer. Write it about yourself:
+  # role, years, domains, standout work, visa status, location constraints.
+  summary: >                              # CHANGE ME
+    Product Manager with 4 years in product (6 professional). Ships AI
+    features: LLM agents, RAG search, evaluation frameworks. Earlier: fintech
+    PM, iOS engineer, founder. Needs visa sponsorship. Based in SF, willing
+    to relocate anywhere in the US.
+
+criteria:
+  # Hard title gates (case-insensitive regex). A title must match at least one
+  # include pattern and no exclude pattern. Tune these to your target role.
+  title_include_patterns:                 # CHANGE ME
+    - 'product\s*manager'
+    - 'product\s*lead\b'
+    - 'product\s*owner'
+    - 'founding\s+product'
+    - 'product\s*operations|product\s*ops'
+    - '^product$'
+  title_exclude_patterns:                 # CHANGE ME
+    - 'marketing'
+    - 'program\s+manager'
+    - 'project\s+manager'
+    - 'production'
+    - 'intern(ship)?\b'
+    - 'co-?op\b'
+    - 'new\s+grad'
+    - '\bvp\b|vice president|chief\s+\w+\s+officer'
+    - 'director'
+    - 'principal'
+  min_salary_ceiling: 0         # skip jobs whose posted max is below this; 0 disables
+  max_posting_age_days: 14
+  us_only: true
+  max_required_yoe: 5           # skip roles REQUIRING more than this many years
+  # Location gate: metro area (regex hints below) or US-remote. Set false to
+  # accept any US location.
+  bay_area_or_remote: true
+  bay_area_hints:               # CHANGE ME to your metro's cities
+    - 'san francisco|south san francisco|\bsf\b|bay area|oakland|berkeley'
+    - 'san jose|palo alto|mountain view|sunnyvale|menlo park|redwood city'
+    - 'san mateo|foster city|burlingame|santa clara|cupertino|fremont'
+  # Companies never to apply to (bait listings, current employer). Regex.
+  company_blocklist: []
+  # Companies you also want a referral at. Jobs are applied to normally, then
+  # flagged in the daily digest so you remember to ping your contact.
+  referral_flag_companies: []
+
+  # JD text that disqualifies immediately. Only relevant if you need visa
+  # sponsorship; set to [] if you do not.
+  sponsorship_blockers:
+    - 'not\s+(able\s+to\s+|currently\s+)?(provide\s+|offer\s+)?sponsor'
+    - 'unable\s+to\s+sponsor'
+    - 'cannot\s+sponsor'
+    - 'will\s+not\s+sponsor'
+    - 'won.?t\s+sponsor'
+    - 'no\s+(visa\s+)?sponsorship'
+    - 'sponsorship\s+is\s+not\s+(available|offered|provided)'
+    - 'without\s+(the\s+need\s+for\s+|requiring\s+)?(visa\s+)?sponsorship'
+    - 'not\s+eligible\s+for\s+(visa\s+)?sponsorship'
+    - 'us\s+citizens?\s+(only|or\s+(green\s*card|permanent\s+resident))'
+    - 'citizens?\s+or\s+permanent\s+residents?\s+only'
+    - 'citizenship\s+(is\s+)?required'
+    - 'must\s+be\s+a\s+u\.?s\.?\s+citizen'
+    - 'security\s+clearance'
+
+discovery:
+  boards:
+    enabled: true
+    per_company_delay_s: 0.7
+    request_timeout_s: 20
+    poll_budget_per_cycle: 1200   # least-recently-polled first; round robin
+  workday:
+    enabled: true
+    search_terms: ['product manager']     # CHANGE ME
+  simplify:
+    enabled: true                 # SimplifyJobs listings.json; has a sponsorship field
+  jobspy:
+    enabled: true
+    # As of 2026-08: only indeed + linkedin work; glassdoor/zip/google are
+    # broken upstream in JobSpy.
+    sites: [indeed, linkedin]
+    linkedin_max_per_run: 40
+    hours_old: 96
+    results_wanted: 60
+    searches:                             # CHANGE ME to your role + metro
+      - search_term: '"product manager"'
+        google_search_term: 'product manager jobs in San Francisco since 3 days ago'
+        location: 'San Francisco, CA'
+        is_remote: false
+      - search_term: '"product manager"'
+        google_search_term: 'remote product manager jobs in United States since 3 days ago'
+        location: 'United States'
+        is_remote: true
+
+scoring:
+  model: claude-haiku-4-5-20251001   # cheap; scoring is high-volume
+  batch_size: 8
+  jd_chars: 5000
+  apply_threshold: 70      # >= goes to the apply queue
+  review_threshold: 50     # >= shows in digest for manual promotion
+  claude_bin: claude       # absolute path if launchd cannot find it on PATH
+  timeout_s: 300
+  # Free-text scoring rules injected into the rubric. State your seniority
+  # sweet spot, adjacent titles you accept, hard location rules, domains that
+  # deserve a bump. This is the main lever for scoring quality.
+  calibration: >                          # CHANGE ME
+    Sweet spot is Product Manager / Senior Product Manager. Staff/Principal/
+    Director and above score below 30. If the posting requires more than 5
+    years of experience, score at most 30 and say so. Location must be SF Bay
+    Area or US-remote; onsite anywhere else scores at most 30. Strong pluses:
+    AI/LLM products, platform SaaS, fintech. Do not penalize unlisted salary.
+
+apply:
+  # Runs on the Claude subscription via the CLI (no API key, ever).
+  # sonnet balances judgment vs plan quota; bump to opus for special jobs.
+  model: sonnet
+  claude_bin: claude
+  max_per_day: 40
+  max_per_batch: 10
+  min_gap_minutes: 5
+  per_job_timeout_s: 1800
+  usage_limit_backoff_minutes: 90   # CLI reported plan limit reached -> pause the queue
+  # ATSes attempted automatically. Others go to the needs_human queue.
+  auto_ats: [greenhouse, lever, ashby, workday, smartrecruiters, workable, recruitee, indeed, linkedin, other]
+  linkedin_max_per_day: 3
+  # Workday needs an account per tenant; credentials file must exist.
+  workday_secrets: secrets/workday.json
+
+digest:
+  keep_days: 30
+  notify: true             # macOS notification via osascript
+
+db: jobs.db
+applications_csv: applications.csv

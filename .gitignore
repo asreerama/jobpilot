@@ -1,0 +1,18 @@
+# personal data — never commit these
+config.yaml
+profile.md
+resume/resume.json
+resume/tailor/*
+!resume/tailor/example.json
+resume/out/
+secrets/*
+!secrets/workday.json.example
+applications.csv
+jobs.db*
+out/
+logs/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.playwright-mcp/

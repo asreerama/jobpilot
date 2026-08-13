@@ -1,0 +1,11 @@
+{
+  "name": "jobpilot",
+  "owner": { "name": "Aditya Sreerama", "url": "https://github.com/asreerama" },
+  "plugins": [
+    {
+      "name": "jobpilot",
+      "source": "./",
+      "description": "Autonomous job application pipeline with guided setup (/jobpilot:setup), apply + resume-tailoring skills, and scheduled hands-off operation."
+    }
+  ]
+}

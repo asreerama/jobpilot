@@ -1,0 +1,89 @@
+{
+  "_comment": "Copy to resume.json and replace with your real data. Bullet ids are stable handles used by tailor overlays (drop/order/rewrite). Keep them short and unique.",
+  "basics": {
+    "name": "Jordan Example",
+    "tagline": "Product Manager - AI platforms and enterprise SaaS",
+    "email": "jordan@example.com",
+    "phone": "(555) 123-4567",
+    "linkedin": "linkedin.com/in/jordanexample",
+    "website": "jordanexample.com",
+    "github": "github.com/jordanexample",
+    "location": "San Francisco, CA",
+    "summary": "Product manager with 4 years shipping AI and platform features for enterprise SaaS. Took two 0-to-1 products to market."
+  },
+  "experience": [
+    {
+      "id": "examplecorp",
+      "role": "Product Manager",
+      "company": "ExampleCorp",
+      "blurb": "AI-powered document platform",
+      "start": "NOV 2023",
+      "end": "Present",
+      "bullets": [
+        {
+          "id": "ec-agent",
+          "text": "Launched a 0-to-1 document analysis AI agent adopted by 50+ enterprise customers; ran 75+ user interviews and owned model selection and accuracy benchmarking."
+        },
+        {
+          "id": "ec-homepage",
+          "text": "Rebuilt the platform homepage and drove adoption to 150,000+ users across 25,000 domains."
+        }
+      ]
+    },
+    {
+      "id": "fintechco",
+      "role": "Product Manager",
+      "company": "FintechCo",
+      "blurb": "Digital wealth management platform",
+      "start": "JUN 2022",
+      "end": "OCT 2023",
+      "bullets": [
+        {
+          "id": "fc-onboarding",
+          "text": "Cut onboarding churn 20% in a regulated flow by redesigning identity verification."
+        }
+      ]
+    },
+    {
+      "id": "founder",
+      "role": "Founder & Product Lead",
+      "company": "SideProject.tools",
+      "blurb": "Bootstrapped SaaS",
+      "start": "2020",
+      "end": "2022",
+      "bullets": [
+        {
+          "id": "sp-launch",
+          "text": "Built and launched a SaaS used by 1,000+ people; handled product, engineering, and support end to end."
+        }
+      ]
+    }
+  ],
+  "education": [
+    {
+      "school": "State University",
+      "degree": "B.S. Computer Science",
+      "note": "",
+      "start": "2014",
+      "end": "2018"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Product",
+      "items": ["Roadmapping", "User Research", "A/B Testing", "Analytics"]
+    },
+    {
+      "name": "Technical",
+      "items": ["SQL", "Python", "LLM Evaluation", "Prompt Engineering"]
+    }
+  ],
+  "links": [
+    {
+      "title": "Portfolio",
+      "url": "https://jordanexample.com",
+      "text": "Case studies and side projects.",
+      "tags": ["portfolio"]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "jobpilot",
+  "description": "24/7 autonomous job application pipeline: discovers jobs across ATS boards, scores fit with Claude, applies with a tailored resume, and reports daily. Includes /jobpilot:setup guided onboarding.",
+  "version": "0.1.0",
+  "author": { "name": "Aditya Sreerama", "url": "https://github.com/asreerama" },
+  "homepage": "https://github.com/asreerama/jobpilot",
+  "repository": "https://github.com/asreerama/jobpilot",
+  "license": "MIT",
+  "keywords": ["jobs", "job-search", "automation", "playwright", "ats", "resume"]
+}

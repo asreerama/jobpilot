@@ -1,0 +1,13 @@
+{
+  "label": "examplecorp-ai-pm",
+  "_job": "https://boards.greenhouse.io/example/jobs/123456",
+  "_why": "JD rewards 0-to-1 AI shipping and enterprise adoption metrics",
+  "summary": "Product manager who ships 0-to-1 AI products for enterprise customers.",
+  "drop": ["fc-onboarding"],
+  "order": ["ec-agent", "ec-homepage"],
+  "rewrite": {
+    "ec-agent": "Own the roadmap for a 0-to-1 agentic AI product adopted by 50+ enterprise customers; ran 75+ user interviews and owned model selection and accuracy benchmarking."
+  },
+  "skills_first": ["Technical", "Product"],
+  "skills_add": {"Technical": ["Agentic AI"]}
+}

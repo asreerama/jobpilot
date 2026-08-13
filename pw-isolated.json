@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "pw": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--isolated"]
+    }
+  }
+}

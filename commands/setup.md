@@ -119,8 +119,18 @@ Tell the user plainly:
   into many third-party Workday tenants.
 - Until this file exists, Workday jobs are not attempted; they park in the
   needs_human queue instead. Skipping this stage is fine.
-- Tenants that email a verification code still stop at needs_human; the
-  digest lists them.
+- Tenants that email a verification code stop at needs_human, UNLESS a
+  Gmail/email MCP is connected (next paragraph).
+
+**Recommend connecting a Gmail MCP** for the email address used on
+applications. With it, the apply agent reads verification codes and
+confirmation links itself (search recent messages, extract the code), so
+account creation on Workday and similar ATSes completes without the user.
+Without it, every emailed code parks the job in needs_human. Setup: `/mcp`
+in Claude Code -> connect the Gmail connector and authorize the account
+(one-time OAuth). Note the tradeoff honestly: the agent gets read access to
+the inbox; a dedicated job-search Gmail address keeps that scoped and also
+keeps recruiter mail in one place.
 
 ## Stage 7: phone notifications (optional, recommended)
 

@@ -31,6 +31,7 @@ audit what the machine did, on your schedule.
 | Node (`npx`) | apply runs launch an isolated [Playwright MCP](https://github.com/microsoft/playwright-mcp) browser via `pw-isolated.json` |
 | BasicTeX + poppler (optional) | the ATS-safe LaTeX resume renderer; there is a Chrome-based fallback renderer |
 | [ntfy](https://ntfy.sh) app on your phone (optional) | push notifications for every apply window and failure |
+| Gmail MCP connected in Claude Code (optional, recommended) | the apply agent fetches emailed verification codes itself during ATS account creation; without it those jobs park in needs_human |
 
 ## Install
 

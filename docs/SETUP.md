@@ -129,6 +129,13 @@ Pick a password you use nowhere else: it sits in plain text on disk
 Workday tenants. Without this file, Workday jobs simply park in the
 needs_human queue, so skipping this section is safe.
 
+**Recommended: connect a Gmail MCP** (`/mcp` in Claude Code, one-time OAuth)
+for the email address you apply with. The apply agent then fetches emailed
+verification codes and confirmation links itself during account creation;
+without it, every emailed code parks the job in needs_human. A dedicated
+job-search Gmail address keeps the access scoped and collects recruiter
+replies in one place.
+
 ## 8. Notifications (optional, but do it before going hands-off)
 
 ```bash

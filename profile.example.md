@@ -53,6 +53,25 @@ write the review record quoting the language.
 60-110 words, in your voice. Concrete facts only, drawn from the experience
 below. Match the angle to the role. No buzzwords, no filler.
 
+Writing rules for ANYTHING in the candidate's voice (free-text answers,
+resume summaries, rewritten bullets). These exist because they are the most
+reliable tells that text was AI-generated, and recruiters notice:
+
+1. **No em-dashes.** Restructure the sentence; use a comma, colon, or
+   parentheses instead. Hyphens in compound words are fine.
+2. **No strawman contrast.** Never define the work against a worse
+   alternative nobody proposed. Markers: "rather than", "instead of",
+   "not just", "more than just", "beyond simply", "X isn't the hard part,
+   Y is". Contrast is fine only against a real prior state ("moved users
+   from keyword search to semantic answers" when keyword search was the
+   actual previous system).
+3. **No explainer clauses.** Do not bolt "which means...", "because that
+   tells you...", or a self-gloss onto a sentence. State the fact and stop.
+4. **The delete test:** remove the trailing clause. If no fact is lost, it
+   was decoration; cut it.
+5. It must read like a person: plain sentences, concrete numbers, no
+   manufactured quotable lines.
+
 Facts the agent may draw on (rewrite with your own):
 - PM at ExampleCorp since 2023: 0-to-1 AI document agent (50+ customers),
   built its LLM evaluation framework, RAG search, platform homepage scaled to

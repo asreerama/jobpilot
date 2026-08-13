@@ -35,7 +35,10 @@ some employers disclose the block only in the form.
 Every fixed answer (work authorization, relocation, demographics, salary)
 comes from `profile.md`. Never improvise an answer to a question the profile
 covers. Free-text answers follow the profile's voice rules and draw only on
-facts listed there.
+facts listed there. Defaults for anything written in the candidate's voice:
+no em-dashes, no strawman contrast ("rather than / not just / instead of"
+framing against an alternative nobody proposed), no explainer clauses bolted
+onto sentences, no buzzwords. It must read like a person wrote it.
 
 ## LinkedIn-sourced jobs
 A linkedin.com apply URL is a pointer, not the destination. Find the

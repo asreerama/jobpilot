@@ -83,11 +83,21 @@ time is churn.
    the candidate has not done, the answer is to not claim it.
 2. **Length must not grow.** The page budget is fixed, so a longer bullet
    costs a line and forces the font down. Aim for the same length or shorter.
-3. **Voice rules from `profile.md` apply** to every `summary`, `tagline`, and
-   `rewrite`. The renderer runs a mechanical `check_prose()` guard (no
-   em-dashes, no strawman contrast by default; edit `_BANNED` in `render.py`
-   to your own rules). **If you see a `!!` line in the output, fix the text
-   and re-render.**
+3. **Voice rules apply** to every `summary`, `tagline`, and `rewrite`: the
+   defaults below plus anything in `profile.md`. The renderer runs a
+   mechanical `check_prose()` guard for the first two (edit `_BANNED` in
+   `render.py` to extend it). **If you see a `!!` line in the output, fix
+   the text and re-render.**
+   - No em-dashes. Restructure the sentence instead.
+   - No strawman contrast: never define the work against a worse
+     alternative nobody proposed ("rather than", "instead of", "not just",
+     "more than just", "beyond simply", "X isn't the hard part"). Contrast
+     against a real prior state is fine.
+   - No explainer clauses bolted onto sentences ("which means...",
+     "...that tells you..."). State the fact and stop.
+   - The delete test: remove the trailing clause; if no fact is lost, cut
+     it. These are the standard tells of AI-generated text, and a resume
+     that trips them reads as machine-written.
 4. Keep it **ATS-safe**: real text, one column, no images, no text in
    headers/footers.
 

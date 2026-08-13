@@ -100,7 +100,29 @@ If they have a CSV of past applications, put it at `applications.csv`
 (header: `date_applied,company,role,outcome,ats,url,application_id`) first so
 seeding registers those companies and the deduper knows their history.
 
-## Stage 6: phone notifications (optional, recommended)
+## Stage 6: Workday credentials (optional)
+
+Explain how Workday applications work before asking anything: every Workday
+company (tenant) requires its own account. The apply agent signs in with
+Google SSO when the tenant offers it and the browser profile has a Google
+session; otherwise it signs in or creates the account using ONE email + ONE
+standard password stored in `secrets/workday.json`:
+
+```bash
+cp secrets/workday.json.example secrets/workday.json
+```
+
+Tell the user plainly:
+
+- Pick a password used for NOTHING else. It is stored in plain text on disk
+  (the file is gitignored and never leaves the machine) and will be typed
+  into many third-party Workday tenants.
+- Until this file exists, Workday jobs are not attempted; they park in the
+  needs_human queue instead. Skipping this stage is fine.
+- Tenants that email a verification code still stop at needs_human; the
+  digest lists them.
+
+## Stage 7: phone notifications (optional, recommended)
 
 ```bash
 mkdir -p ~/.config/jobpilot
@@ -116,7 +138,7 @@ subscribe to that topic in the ntfy iOS/Android app. Test with:
 .venv/bin/python -m jobpilot.notify "JobPilot" "setup test" 3 tada
 ```
 
-## Stage 7: first supervised run
+## Stage 8: first supervised run
 
 ```bash
 .venv/bin/python -m jobpilot.discover      # takes a while on first run
@@ -131,7 +153,7 @@ real apply batch while watching:
 `.venv/bin/python -m jobpilot.applier`, then review the record in
 `out/applications/`.
 
-## Stage 8: going hands-off (launchd)
+## Stage 9: going hands-off (launchd)
 
 Only after the user has reviewed at least one supervised application. Render
 the templates and load them:

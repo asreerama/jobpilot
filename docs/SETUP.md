@@ -113,7 +113,23 @@ Track any specific company later with:
   --meta '{"host":"acme.wd5.myworkdayjobs.com","site":"External"}'
 ```
 
-## 7. Notifications (optional, but do it before going hands-off)
+## 7. Workday credentials (optional)
+
+Every Workday tenant needs its own account. When a tenant offers Google SSO
+and the Playwright browser profile carries a Google session, the agent signs
+in that way. Otherwise it uses one email + one standard password from
+`secrets/workday.json`:
+
+```bash
+cp secrets/workday.json.example secrets/workday.json   # then edit
+```
+
+Pick a password you use nowhere else: it sits in plain text on disk
+(gitignored, never leaves the machine) and gets typed into many third-party
+Workday tenants. Without this file, Workday jobs simply park in the
+needs_human queue, so skipping this section is safe.
+
+## 8. Notifications (optional, but do it before going hands-off)
 
 ```bash
 mkdir -p ~/.config/jobpilot
@@ -133,7 +149,7 @@ password. Test:
 Config lives in `$HOME`, not the repo, so alerts still fire when the repo's
 disk is unreadable.
 
-## 8. First runs, supervised
+## 9. First runs, supervised
 
 ```bash
 .venv/bin/python -m jobpilot.discover        # first sweep takes a while
@@ -148,7 +164,7 @@ Review `out/applications/<id>-<company>.md` and the screenshot after each
 job. Adjust `profile.md` and `scoring.calibration` until the answers and the
 queue both look right. Do not schedule anything before this step.
 
-## 9. Schedule it (launchd)
+## 10. Schedule it (launchd)
 
 ```bash
 mkdir -p ~/Library/LaunchAgents

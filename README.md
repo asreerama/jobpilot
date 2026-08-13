@@ -115,8 +115,8 @@ digest lands in `out/digest-YYYY-MM-DD.md`.
 ## Going hands-off
 
 The pipeline is designed to run unattended on a Mac that stays on (a Mac mini
-is ideal). Run `/jobpilot:setup` stage 8, or render the launchd templates
-yourself (see [docs/SETUP.md](docs/SETUP.md#8-schedule-it-launchd)). The
+is ideal). Run `/jobpilot:setup` stage 9, or render the launchd templates
+yourself (see [docs/SETUP.md](docs/SETUP.md#10-schedule-it-launchd)). The
 schedule: discover+match every 3 hours, five apply windows a day, digest at
 08:05.
 
@@ -125,8 +125,8 @@ Hands-off operation has real requirements. Check every one:
 - **The machine must be awake** at run times. `sudo pmset repeat wakeorpoweron MTWRFSU 09:35:00` or Amphetamine/caffeinate. launchd skips runs that fall in sleep.
 - **Full Disk Access for `/bin/zsh`** (System Settings > Privacy & Security) if the repo lives on an external volume, or launchd jobs cannot read it. This failure is silent, and it is exactly what the ntfy alerts exist to catch.
 - **Claude CLI logged in** and the plan's usage window not exhausted. The pipeline detects usage-limit responses, requeues the job, and backs off for 90 minutes on its own; lower `apply.max_per_day` if you hit limits daily.
-- **Browser logins**: a Google session in the Playwright browser profile makes Workday tenants with Google SSO sign in without passwords. Workday tenants without it use `secrets/workday.json` (one standard password you choose, used for every tenant account it creates).
-- **Notifications configured** (stage 6 of setup), or you will not hear about failures. `cycle.sh` is silent when healthy and loud when broken by design.
+- **Browser logins**: a Google session in the Playwright browser profile makes Workday tenants with Google SSO sign in without passwords. Workday tenants without it use `secrets/workday.json` (setup stage 6: one standard password you choose, used for every tenant account it creates; use it for nothing else).
+- **Notifications configured** (stage 7 of setup), or you will not hear about failures. `cycle.sh` is silent when healthy and loud when broken by design.
 - **Check the needs_human queue** in the morning digest. Captchas, login walls, and email-verification codes park there and wait for you.
 
 Pause everything: `launchctl bootout gui/$(id -u)/com.jobpilot.apply` (same

@@ -102,21 +102,45 @@ python3 -m venv .venv
 mkdir -p logs out/applications secrets
 ```
 
-## Stage 2: config.yaml
+## Stage 2: config.yaml - the filtering and scoring criteria
 
-Copy `config.example.yaml` to `config.yaml`. Interview the user for each
-CHANGE ME section and write their answers in:
+First explain, in two sentences, how a job gets judged: layer 1 is hard
+filters in `criteria.*` (title regexes, location, posting age, required
+years, sponsorship blockers) that kill jobs before any LLM sees them;
+layer 2 is a Claude score 0-100 driven by `profile.summary` +
+`scoring.calibration`, where >= 70 (`apply_threshold`) auto-queues and
+>= 50 (`review_threshold`) shows in the digest for manual promotion.
 
-- name, email, location
-- the one-line candidate summary for the scorer (role, years, domains, visa
-  status, location constraints)
-- target job titles -> title_include_patterns / title_exclude_patterns
-- metro area or remote preference -> bay_area_or_remote + hints (rename
-  mentally; the key works for any metro)
-- max required years of experience, posting age
-- whether they need visa sponsorship (if not, set sponsorship_blockers to [])
-- scoring.calibration: their seniority sweet spot and location rules
-- apply caps (defaults are sane: 40/day, 10/batch, 5 min gaps)
+Tell them where to change it later: everything in this stage is
+`config.yaml`, plain YAML, edit any time; changes apply from the next
+discover/match cycle, no restart needed. If good jobs are being filtered
+out, loosen `criteria.*`; if bad jobs are getting queued, sharpen
+`scoring.calibration` or raise `apply_threshold`.
+
+Copy `config.example.yaml` to `config.yaml`. Then interview the user ONE
+QUESTION AT A TIME - ask, wait for the answer, write it into config.yaml,
+show what you wrote, then ask the next. Do not dump one giant questionnaire.
+The sequence:
+
+1. Name, email, location.
+2. The one-line candidate summary for the scorer (role, years, domains,
+   visa status, location constraints).
+3. Target job titles -> build title_include_patterns with them; read the
+   regexes back in plain English.
+4. Titles to always exclude (too senior, wrong function) ->
+   title_exclude_patterns.
+5. Location: which metro, or remote-only, or anywhere in the US ->
+   bay_area_or_remote + hints (the key name says Bay Area; the hints are
+   just regexes, put their metro's cities in).
+6. Max required years of experience they want to see; max posting age.
+7. Do they need visa sponsorship? If no, set sponsorship_blockers to [].
+8. Salary floor, if any (min_salary_ceiling; 0 disables).
+9. Companies to never apply to (current employer, blocklist).
+10. scoring.calibration: their seniority sweet spot, adjacent titles they
+    accept, location rules, domains that deserve a bump or a penalty.
+    Draft it from their earlier answers, show it, let them edit.
+11. Apply caps - defaults are sane (40/day, 10/batch, 5 min gaps); ask only
+    whether they want them lower to start.
 
 ## Stage 3: profile.md
 

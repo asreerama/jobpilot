@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.jobpilot.watchdog</string>
+  <!-- Program lives on the INTERNAL disk so it still runs when an external
+       pipeline volume is gone. guard/install.sh renders {{HOME}}. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>{{HOME}}/.local/jobpilot-guard/watchdog.sh</string>
+  </array>
+  <key>StartInterval</key><integer>600</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>{{HOME}}/.local/jobpilot-guard/watchdog-launchd.log</string>
+  <key>StandardErrorPath</key><string>{{HOME}}/.local/jobpilot-guard/watchdog-launchd.log</string>
+  <key>ProcessType</key><string>Background</string>
+</dict>
+</plist>

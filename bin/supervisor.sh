@@ -13,7 +13,7 @@ trap 'echo "[supervisor.sh] terminated $(date "+%F %T")"; exit 143' TERM INT
 
 if [ ! -d "$ROOT" ]; then
   echo "[supervisor.sh] ROOT not accessible: $(ls -d "$ROOT" 2>&1)"
-  jp_notify "⛔️ JobPilot supervisor — no disk" \
+  jp_notify "⛔️ JobPilot supervisor: no disk" \
     "$(date '+%H:%M'): cannot read the pipeline directory. Volume unmounted, or /bin/zsh lost Full Disk Access." 5 floppy_disk
   sleep 300     # let launchd's KeepAlive retry rather than spin
   exit 0

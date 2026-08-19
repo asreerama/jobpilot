@@ -20,7 +20,7 @@ Log: ~/Library/Logs/jobpilot-apply.log" 5 rotating_light
 
 if [ ! -d "$ROOT" ]; then
   echo "[apply.sh] ROOT not accessible: $(ls -d "$ROOT" 2>&1)"
-  jp_notify "⛔️ JobPilot skipped — no disk" \
+  jp_notify "⛔️ JobPilot skipped: no disk" \
     "$(date '+%H:%M') run could not read the pipeline directory. Either the volume is unmounted, or /bin/zsh lost Full Disk Access." 5 floppy_disk
   exit 0
 fi

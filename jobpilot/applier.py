@@ -126,9 +126,16 @@ def apply_one(conn, cfg, job) -> str:
     db.set_status(conn, job["id"], "applying")
     conn.commit()
     try:
+        # Parallel workers set JOBPILOT_MCP_CONFIG to their own Playwright
+        # MCP config so each worker drives a private Chrome profile. Without
+        # it the shared persistent profile is used and runs must stay serial.
+        cmd = [a["claude_bin"], "-p", "--model", a["model"],
+               "--permission-mode", "bypassPermissions"]
+        mcp_cfg = os.environ.get("JOBPILOT_MCP_CONFIG")
+        if mcp_cfg:
+            cmd += ["--mcp-config", mcp_cfg, "--strict-mcp-config"]
         proc = subprocess.run(
-            [a["claude_bin"], "-p", "--model", a["model"],
-             "--permission-mode", "bypassPermissions"],
+            cmd,
             input=prompt, capture_output=True, text=True,
             timeout=a["per_job_timeout_s"], env=env, cwd=workdir,
         )
@@ -167,8 +174,13 @@ def apply_one(conn, cfg, job) -> str:
     if outcome not in ("applied", "skipped_no_sponsorship", "needs_human",
                        "expired", "failed"):
         outcome = "needs_human"
-    db.set_status(conn, job["id"], outcome, **fields)
+    # Guarded write: if the supervisor requeued this row and another attempt
+    # already finished it, rowcount is 0 and this late result is dropped
+    # rather than overwriting a terminal record.
+    changed = db.set_status(conn, job["id"], outcome, **fields)
     conn.commit()
+    if not changed:
+        return "late_result_dropped"
     return outcome
 
 

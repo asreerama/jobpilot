@@ -85,7 +85,32 @@ def connect(db_path: str) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.executescript(SCHEMA)
+    _migrate(conn)
     return conn
+
+
+# Claim-fencing columns. ALTER TABLE ADD COLUMN is non-destructive and is
+# guarded for idempotence here; existing rows keep NULLs, which read as
+# "no active claim".
+_CLAIM_COLS = (
+    ("claim_pid", "INTEGER"),
+    ("claim_worker", "INTEGER"),
+    ("claim_attempt", "TEXT"),
+    ("lease_until", "TEXT"),
+)
+
+
+def _migrate(conn):
+    have = {r[1] for r in conn.execute("PRAGMA table_info(jobs)")}
+    for col, typ in _CLAIM_COLS:
+        if col not in have:
+            conn.execute("ALTER TABLE jobs ADD COLUMN %s %s" % (col, typ))
+    conn.commit()
+
+
+#: statuses that must never be silently overwritten. 'applied' is an external
+#: irreversible fact; flipping it would desync the DB from reality.
+TERMINAL = ("applied",)
 
 
 def upsert_job(conn, row: dict) -> bool:
@@ -105,11 +130,21 @@ def upsert_job(conn, row: dict) -> bool:
         return False
 
 
-def set_status(conn, jid: str, status: str, **fields):
+def set_status(conn, jid: str, status: str, force: bool = False, **fields):
+    """Update a job's status. Terminal rows are immutable unless force=True:
+    a late-finishing worker or a stale-lease requeue must never overwrite the
+    record of an application that actually went out.
+    Returns the number of rows changed (0 = guarded or gone)."""
     fields["status"] = status
     fields["updated_at"] = utcnow()
     sets = ",".join(f"{k}=?" for k in fields)
-    conn.execute(f"UPDATE jobs SET {sets} WHERE id=?", [*fields.values(), jid])
+    sql = f"UPDATE jobs SET {sets} WHERE id=?"
+    args = [*fields.values(), jid]
+    if not force:
+        sql += " AND status NOT IN (%s)" % ",".join("?" * len(TERMINAL))
+        args += list(TERMINAL)
+    cur = conn.execute(sql, args)
+    return cur.rowcount
 
 
 def add_company(conn, slug: str, ats: str, name: str = "", source: str = "",

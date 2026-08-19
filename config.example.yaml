@@ -40,6 +40,12 @@ criteria:
   max_posting_age_days: 14
   us_only: true
   max_required_yoe: 5           # skip roles REQUIRING more than this many years
+  # Fail closed on postings that arrived without a job description. Without a
+  # JD, max_required_yoe and sponsorship_blockers both pass everything, since
+  # neither can match empty text. Such rows park in 'needs_jd';
+  # bin/backfill_jd.py fetches the descriptions and returns them to the queue.
+  require_jd: true
+  min_jd_chars: 200
   # Location gate: metro area (regex hints below) or US-remote. Set false to
   # accept any US location.
   bay_area_or_remote: true
@@ -90,6 +96,10 @@ discovery:
     linkedin_max_per_run: 40
     hours_old: 96
     results_wanted: 60
+    # Ask JobSpy for LinkedIn descriptions during discovery. Much slower and
+    # rate-limited, but it keeps LinkedIn results out of 'needs_jd'. Leave
+    # false and run bin/backfill_jd.py instead if discovery runs get throttled.
+    linkedin_fetch_description: false
     searches:                             # CHANGE ME to your role + metro
       - search_term: '"product manager"'
         google_search_term: 'product manager jobs in San Francisco since 3 days ago'

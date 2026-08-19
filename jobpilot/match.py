@@ -10,9 +10,15 @@ from .score import score_batch, is_usage_limit
 def run(conn, cfg):
     filters = Filters(cfg)
     sc = cfg["scoring"]
-    stats = {"filtered_out": 0, "skipped_no_sponsorship": 0, "duplicate": 0,
-             "flagged_referral": 0, "referral_wanted": 0, "scored": 0,
-             "queued": 0, "score_errors": 0}
+    # defaultdict: filters.check can return verdicts this dict was never
+    # seeded with (needs_jd is the current example) and a KeyError here kills
+    # the whole match run, which silently stops everything downstream.
+    from collections import defaultdict
+    stats = defaultdict(int)
+    for k in ("filtered_out", "skipped_no_sponsorship", "duplicate",
+              "flagged_referral", "referral_wanted", "scored", "queued",
+              "needs_jd", "score_errors"):
+        stats[k] = 0
 
     import os
     rows = conn.execute("SELECT * FROM jobs WHERE status='discovered'").fetchall()
@@ -20,7 +26,14 @@ def run(conn, cfg):
     survivors = []
     referral_ids = set()
     for j in rows:
-        verdict, reason = filters.check(j)
+        try:
+            verdict, reason = filters.check(j)
+        except Exception as e:
+            # One malformed row must never take down the whole match stage.
+            stats["filter_errors"] += 1
+            db.set_status(conn, j["id"], "filtered_out",
+                          filter_reason="filter_error:%s" % type(e).__name__)
+            continue
         if verdict == "pass":
             survivors.append(j)
             if reason == "referral_wanted":

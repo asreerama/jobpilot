@@ -28,6 +28,8 @@ class Filters:
         self.max_age_days = c.get("max_posting_age_days") or 365
         self.us_only = c.get("us_only", True)
         self.max_yoe = c.get("max_required_yoe") or 99
+        self.require_jd = c.get("require_jd", True)
+        self.min_jd_chars = c.get("min_jd_chars") or 200
         self.bay_or_remote = c.get("bay_area_or_remote", False)
         self.bay_hints = _compile(c.get("bay_area_hints"))
         self.referral = _compile(c.get("referral_flag_companies"))
@@ -100,7 +102,15 @@ class Filters:
         pair = ((job["company"] or "").strip().lower(), title.strip().lower())
         if pair in self.applied_pairs:
             return ("duplicate", "company+title_in_history")
-        jd = job["jd_text"] or ""
+        jd = (job["jd_text"] or "").strip()
+        # Fail closed when there is no job description. Without one, BOTH the
+        # years-of-experience cap above and the sponsorship-blocker scan below
+        # silently pass everything: required_yoe("") is None and no blocker can
+        # match empty text. That is how over-cap roles and no-sponsorship
+        # postings reach the applier. LinkedIn-sourced jobs rarely carry a JD;
+        # bin/backfill_jd.py fetches descriptions for rows parked here.
+        if self.require_jd and len(jd) < self.min_jd_chars:
+            return ("needs_jd", f"no_jd:{len(jd)}chars")
         for p in self.blockers:
             m = p.search(jd)
             if m:

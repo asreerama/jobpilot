@@ -80,11 +80,27 @@ NON_US_HINTS = re.compile(
     r"poland|spain|israel|tel aviv|emea|apac|latam)\b",
     re.I,
 )
+# City names that carry no state or country token in the posting. Without
+# these, looks_us() rejected a plain "Sunnyvale" or "Broomfield HQ" as non-US
+# and threw away good roles.
+US_CITIES = (
+    "san francisco|south san francisco|oakland|berkeley|emeryville|san jose|"
+    "palo alto|mountain view|sunnyvale|santa clara|cupertino|menlo park|"
+    "redwood city|san mateo|foster city|burlingame|fremont|milpitas|san carlos|"
+    "los gatos|campbell|daly city|sausalito|mill valley|bay area|silicon valley|"
+    "new york|brooklyn|seattle|bellevue|austin|boston|cambridge|chicago|denver|"
+    "boulder|broomfield|louisville|los angeles|san diego|santa monica|irvine|"
+    "portland|atlanta|miami|orlando|tampa|dallas|houston|philadelphia|"
+    "pittsburgh|detroit|minneapolis|nashville|charlotte|raleigh|durham|"
+    "washington dc|arlington|bethesda|salt lake city|phoenix|scottsdale|"
+    "las vegas|kansas city|st. louis|columbus|cleveland|cincinnati|indianapolis|"
+    "madison|milwaukee|sacramento|san rafael|pleasanton|walnut creek|"
+    "north chicago|chattanooga|plano"
+)
 US_HINTS = re.compile(
     r"\b(united states|usa|u\.s\.|remote.{0,10}(us|usa|united states)|"
     + "|".join(US_STATES)
-    + r")\b|san francisco|new york|seattle|austin|boston|chicago|denver|"
-    r"los angeles|palo alto|mountain view|remote",
+    + r")\b|" + US_CITIES + r"|remote",
     re.I,
 )
 

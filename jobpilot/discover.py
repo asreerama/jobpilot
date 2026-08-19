@@ -148,7 +148,8 @@ def run_jobspy(conn, cfg, filters):
                 results_wanted=jcfg.get("results_wanted", 60),
                 hours_old=jcfg.get("hours_old", 72),
                 country_indeed="USA",
-                linkedin_fetch_description=False,
+                linkedin_fetch_description=jcfg.get(
+                    "linkedin_fetch_description", False),
                 verbose=0,
             )
         except Exception as e:

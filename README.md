@@ -105,6 +105,7 @@ whole file every run. Scoring-side instructions ("penalize agencies",
 .venv/bin/python -m jobpilot.parallel          # apply with 4 concurrent workers
 .venv/bin/python -m jobpilot.digest            # generate the digest now
 .venv/bin/python -m jobpilot.seed              # re-seed companies
+.venv/bin/python bin/backfill_jd.py            # fetch JDs for needs_jd rows
 ```
 
 With the plugin installed, `/jobpilot:status` gives you the same overview
@@ -131,8 +132,91 @@ Hands-off operation has real requirements. Check every one:
 - **Check the needs_human queue** in the morning digest. Captchas, login walls, and email-verification codes park there and wait for you.
 
 Pause everything: `launchctl bootout gui/$(id -u)/com.jobpilot.apply` (same
-for `cycle`/`digest`). Resume with `launchctl bootstrap gui/$(id -u)
-~/Library/LaunchAgents/com.jobpilot.apply.plist`.
+for `cycle`/`digest`/`supervisor`/`watchdog`). Resume with `launchctl
+bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.jobpilot.apply.plist`.
+
+## Durability
+
+Unattended for weeks means every layer needs something above it that notices
+when it stops. There are three.
+
+**The supervisor owns the fleet.** `bin/supervisor.sh` runs under launchd with
+`KeepAlive`, and `bin/supervisor.py` loops every 60 seconds: reap dead workers
+and respawn them (three crashes inside ten minutes parks that slot), recover
+expired claims, run match when the queue goes dry, promote scored jobs at or
+above `promote_floor` when match produced nothing, and write a heartbeat.
+Workers are `bin/worker_apply.py` processes, each with its own Chrome profile
+via `workers/pw-N.json`. When a watched source file changes on disk and still
+compiles, the supervisor exits 0 and launchd relaunches it on the new code.
+
+**The watchdog checks the supervisor**, every 10 minutes. `guard/watchdog.sh`
+is installed to `~/.local/jobpilot-guard/` on the internal disk, off the
+pipeline volume on purpose: if the pipeline lives on an external drive,
+nothing on that drive can report the drive being gone. It reads
+`logs/supervisor-heartbeat` and intervenes on two conditions: the heartbeat is
+more than 5 minutes stale, or the heartbeat is fresh but nothing has reached a
+terminal status in 90 minutes while applyable work is sitting in the queue.
+Intervention is SIGTERM to the supervisor, then `launchctl kickstart`. The
+same run takes a daily `VACUUM INTO` snapshot of `jobs.db` and
+`applications.csv` to the internal disk, and alerts at 95% disk use.
+
+**The healer is the last resort.** Two watchdog interventions without recovery
+invoke `guard/healer.sh`, which hands the evidence (supervisor log, watchdog
+log, heartbeat, launchd state, status counts, worker logs) to `claude -p`
+under a narrow mandate: edit only `bin/`, `jobpilot/`, `config.yaml`; never
+touch database rows, `applications.csv`, `secrets/`, or `out/`. The limits are
+enforced in the script, not in the prompt: one healer at a time, two runs per
+day, a 30 minute timeout, and a snapshot of `bin/` and `jobpilot/` taken
+before Claude may edit anything. Verification is non-submitting: a fresh
+`RUNNING` heartbeat plus a row entering `applying`. A real application is
+never part of the test. If the healer cannot fix it, or diagnoses something
+outside its mandate, you get a push notification saying a human is needed.
+
+### Heartbeat states
+
+`logs/supervisor-heartbeat` is rewritten atomically (temp file plus rename)
+every cycle, carrying one state plus the counts behind it.
+
+| State | Meaning |
+|---|---|
+| `RUNNING` | workers are up and there is applyable work |
+| `MATCHING` | queue dry; match running synchronously over discovered jobs |
+| `PROMOTING` | queue dry and nothing new matched; promoting scored jobs above the floor |
+| `DRY` | nothing left that this fleet is allowed to apply to |
+| `CAP_HOLD` | daily application cap reached |
+| `BACKOFF` | Claude usage limit hit; the whole queue is paused |
+| `RELOADING` | watched source changed; exiting for a clean launchd restart |
+| `STOPPING` | SIGTERM received; workers left to finish their claims |
+
+The watchdog treats `CAP_HOLD`, `BACKOFF`, `RELOADING` and `STOPPING` as
+healthy holds and never intervenes during them. It keys off the state string,
+never off raw counts.
+
+### Claim fencing and lease recovery
+
+Every claim stamps `claim_pid`, `claim_worker`, `claim_attempt` and
+`lease_until` (45 minutes) onto the job row, taken with a conditional
+`UPDATE ... WHERE status='queued'` so two workers cannot win the same job.
+The supervisor requeues an expired lease only when the owning PID is also
+dead; a slow worker is left alone until it finishes.
+
+Ambiguous submissions are never retried. If the dead worker got far enough to
+write its review record in `out/applications/`, the form may already have been
+submitted, so the job goes to `needs_human` with a note instead of back into
+the queue. `applied` is a terminal status at the database layer: `set_status`
+refuses to overwrite it, and a worker whose result lands after its job was
+already finished elsewhere drops the result rather than double-recording it.
+
+### Installing the guard
+
+```bash
+zsh guard/install.sh
+```
+
+Copies `watchdog.sh` and `healer.sh` to `~/.local/jobpilot-guard/` with your
+real pipeline path substituted in, renders the watchdog plist, and loads it.
+Idempotent; re-run it after editing either script. The supervisor itself
+installs like the other agents, from `launchd/com.jobpilot.supervisor.plist.template`.
 
 ## Behavior worth knowing
 
@@ -166,7 +250,9 @@ conservative. What you do with the caps is on you.
 
 ```
 jobpilot/            the Python package (discover, filter, score, apply, digest, notify)
-bin/                 launchd entrypoints (apply.sh, cycle.sh, digest.sh)
+bin/                 launchd entrypoints (apply.sh, cycle.sh, digest.sh, supervisor.sh),
+                     the supervisor and its workers, and backfill_jd.py
+guard/               off-volume watchdog + healer and their installer
 launchd/             plist templates, rendered by setup
 seeds/               ~2,000 verified ATS board slugs to bootstrap discovery
 skills/              Claude skills: job-applications, resume-tailoring

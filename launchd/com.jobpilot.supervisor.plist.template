@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.jobpilot.supervisor</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>{{ROOT}}/bin/supervisor.sh</string>
+  </array>
+  <!-- The point of this agent: if it dies, launchd brings it straight back. -->
+  <key>KeepAlive</key><true/>
+  <key>RunAtLoad</key><true/>
+  <key>ThrottleInterval</key><integer>60</integer>
+  <key>StandardOutPath</key><string>{{ROOT}}/logs/supervisor.log</string>
+  <key>StandardErrorPath</key><string>{{ROOT}}/logs/supervisor.log</string>
+  <key>ProcessType</key><string>Background</string>
+</dict>
+</plist>

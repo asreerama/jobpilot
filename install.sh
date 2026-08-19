@@ -10,7 +10,28 @@ echo "== python venv =="
 .venv/bin/pip install --quiet -r requirements.txt
 
 echo "== working directories =="
-mkdir -p logs out/applications secrets resume/out resume/tailor
+mkdir -p logs logs/workers out/applications secrets resume/out resume/tailor
+mkdir -p workers/profiles
+
+echo "== per-worker browser configs =="
+# The supervisor fleet needs one Playwright MCP config per worker slot, each
+# pinned to its own Chrome profile directory so workers cannot fight over one.
+for n in 1 2 3 4 5 6; do
+  cat > "workers/pw-$n.json" <<JSON
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--user-data-dir",
+        "$PWD/workers/profiles/chrome-$n"
+      ]
+    }
+  }
+}
+JSON
+done
 
 echo "== config files =="
 [ -f config.yaml ]        || { cp config.example.yaml config.yaml; echo "  created config.yaml (EDIT IT)"; }

@@ -11,6 +11,7 @@ applications.csv
 jobs.db*
 out/
 logs/
+workers/
 .venv/
 __pycache__/
 *.pyc

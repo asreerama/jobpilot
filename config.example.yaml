@@ -144,6 +144,15 @@ apply:
   # Workday needs an account per tenant; credentials file must exist.
   workday_secrets: secrets/workday.json
 
+supervisor:
+  # bin/supervisor.py takes these as CLI flags; bin/supervisor.sh reads the
+  # first two from the environment (JOBPILOT_WORKERS, JOBPILOT_BATCH). Listed
+  # here as the documented defaults.
+  workers: 6              # concurrent worker slots, one Chrome profile each
+  batch: 5                # jobs each worker claims before it exits
+  promote_floor: 60       # when the queue runs dry, promote scored >= this
+  exclude_ats: workday,linkedin   # ATSes the fleet never claims automatically
+
 digest:
   keep_days: 30
   notify: true             # macOS notification via osascript
